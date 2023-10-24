@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='schematic-line-tracing',
+    name='schematicLT',
     version='0.0.1',
     author='Konya, Tschavoll',
     author_email='your@email.com',
