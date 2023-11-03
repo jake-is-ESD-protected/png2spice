@@ -1,0 +1,3 @@
+[submodule "SPICEnet"]
+	path = SPICEnet
+	url = https://github.com/jake-is-ESD-protected/SPICEnet
