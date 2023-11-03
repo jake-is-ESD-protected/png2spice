@@ -1,11 +1,11 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='schematicLT',
+    name='png2spice',
     version='0.0.1',
     author='Konya, Tschavoll',
     author_email='your@email.com',
-    description='Assortment of line tracing tools for analytic schematic recognition',
+    description='Assortment of line tracing, object detection and classification for schematic recognition',
     packages=find_packages(),
     install_requires=[
         'numpy',
@@ -20,7 +20,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
     ],
-    url='https://github.com/jake-is-ESD-protected/schematic-line-tracing',
+    url='https://github.com/jake-is-ESD-protected/png2spice',
     license='MIT',
     keywords='schematic, image recognition',
 )
