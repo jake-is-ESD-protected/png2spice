@@ -1,7 +1,9 @@
-# schematic-line-tracing
+# PNG2SPICE
 
 ## About
-Small python module for analytic line tracing of electrical schematics.
+Need a reference design in LTSPICE but only have screenshots available? Manually copying is **boring**, so just use **PNG2SPICE**!
+
+**PNG2SPICE** uses image processing and the convolutional neural network [SPICEnet](https://github.com/jake-is-ESD-protected/SPICEnet) to detect, classify and localize electrical components from an image. It is then parsed into a `.asc` file which can be opened by LTSPICE. Check out [SPICEnet](https://github.com/jake-is-ESD-protected/SPICEnet) to see which components it supports.
 
 ## Setup
 ```
@@ -14,7 +16,7 @@ pip install -e .
 ```
 
 ## Structure
-Put all source code under `schematic-line-tracing` into a python file that encapsulates related functions and classes. Run tests in `tests`. Add all needed external modules to `requirements.txt`. This repo follows the standard python module structure.
+
 
 ## Examples
 
