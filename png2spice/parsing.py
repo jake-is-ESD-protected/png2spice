@@ -1,4 +1,4 @@
-from POI import POI, POITypes
+from .POI import POI, POITypes
 from typing import List
 
 # TODO: Anything WIRE-related
@@ -22,19 +22,19 @@ class CParser():
         posx = str(poi.position[0])
         posy = str(poi.position[1])
         rot = str(poi.rotation)
-        if poi.type <= POITypes.Diode:
+        if poi.type.value <= POITypes.Diode.value:
             return f"SYMBOL {self.part_aliases[f'{poi.type}']} {posx} {posy} R{rot}"
-        if poi.type == POITypes.GND:
+        if poi.type.value == POITypes.GND.value:
             return f"FLAG {posx} {posy} {self.part_aliases[f'{poi.type}']}"
+        else:
+            return ""
 
 
     def Graph2Asc(self, save_path: str="./output.asc", graph: List[POI]=None):
         if graph:
             self.graph = graph
-        with open(save_path) as f:
+        with open(save_path, 'w') as f:
             f.write(self.header + "\n")
             for poi in self.graph:
                 f.write(self.Poi2Str(poi) + "\n")
             
-        
-        
