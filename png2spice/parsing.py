@@ -18,7 +18,24 @@ class CParser():
             f"{POITypes.GND}": "0",            
         })
     
-    def Poi2Str(self, poi: POI) -> str:
+    def __Poi2Str(self, poi: POI) -> str:
+        """
+        BRIEF
+        -----
+        Convert a POI object into a single line in the LTSPICE
+        syntax.
+
+        PARAMETERS
+        ----------
+        `poi`: `png2spice.POI.POI`
+            POI object to be converted.
+        
+        RETURNS
+        -------
+        `str`:
+            POI as line in text format corresponding to LTSPICE
+            syntax.
+        """
         posx = str(poi.position[0])
         posy = str(poi.position[1])
         rot = str(poi.rotation)
@@ -29,12 +46,27 @@ class CParser():
         else:
             return ""
 
-
     def Graph2Asc(self, save_path: str="./output.asc", graph: List[POI]=None):
+        """
+        BRIEF
+        -----
+        Iterate through all registered POIs in the graph and convert them
+        into LTSPICE syntax.
+
+        PARAMETERS
+        ----------
+        `save_path`: `str`
+            Destination of `.asc` LTSPICE file to be saved.
+            Default is `./output.asc`
+        `graph`: `list[png2spice.POI.POI]`
+            Graph to be converted. A graph is a list of POIs. If `graph` is 
+            omitted, the graph passed at the creation of the `CParser` is
+            used. Default is `None`.
+        """
         if graph:
             self.graph = graph
         with open(save_path, 'w') as f:
             f.write(self.header + "\n")
             for poi in self.graph:
-                f.write(self.Poi2Str(poi) + "\n")
+                f.write(self.__Poi2Str(poi) + "\n")
             
