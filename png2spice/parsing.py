@@ -23,7 +23,7 @@ class CParser():
     RESISTOR VER LOWER TERMINAL Y - 96
     RESISTOR HOR LEFT X -96
     RESISTOR HOR LEFT Y +16
-    RESISTOR HOR RIGHT X +64
+    RESISTOR HOR RIGHT X -16
     RESISTOR HOR RIGHT Y +16
 
     CAPACITOR VER UPPER TERMINAL Y + 16
@@ -89,7 +89,7 @@ class CParser():
                 if(terminal == "A"):
                     return f"{x - 96} {y + 16}"
                 elif(terminal == "B"):
-                    return f"{x + 64} {y + 16}"
+                    return f"{x - 16} {y + 16}"
         elif(POIType == POITypes.Capacitor):
             if(rot == 0):
                 if(terminal == "A"):
@@ -132,14 +132,10 @@ class CParser():
         startY = startPOI.position[1]
         rot = startPOI.rotation
         if(terminal == "A" and startPOI.terminalA is not None):
-            endX = startPOI.terminalA.position[0]
-            endY = startPOI.terminalA.position[1]
-            print(self.__GeneratePartOffset(startPOI.type, startX, startY, rot, terminal))
-            return f"WIRE {self.__GeneratePartOffset(startPOI.type, startX, startY, rot, terminal)} {self.__GeneratePartOffset(startPOI.terminalA.type, endX, endY, rot , terminal)}"
+            return f"WIRE {self.__GeneratePartOffset(startPOI.type, startX, startY, startPOI.rotation, terminal)} {self.__GeneratePartOffset(startPOI.terminalA.type, startPOI.terminalA.position[0], startPOI.terminalA.position[1], startPOI.terminalA.rotation , 'A')}"
         elif(terminal == "B" and startPOI.terminalB is not None):
-            endX = startPOI.terminalB.position[0]
-            endY = startPOI.terminalB.position[1]
-            return f"WIRE {self.__GeneratePartOffset(startPOI.type, startX, startY, rot, terminal)} {self.__GeneratePartOffset(startPOI.terminalB.type, endX, endY, rot, terminal)}"
+            print(self.__GeneratePartOffset(startPOI.type, startX, startY, startPOI.rotation, terminal))
+            return f"WIRE {self.__GeneratePartOffset(startPOI.type, startX, startY, startPOI.rotation, terminal)} {self.__GeneratePartOffset(startPOI.terminalB.type, startPOI.terminalB.position[0], startPOI.terminalB.position[1], startPOI.terminalB.rotation, 'B')}"
         else:
             return ""
         
