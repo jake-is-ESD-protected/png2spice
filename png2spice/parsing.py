@@ -84,7 +84,7 @@ class CParser():
                 if(terminal == "A"):
                     return f"{x + 16} {y + 16}"
                 elif(terminal == "B"):
-                    return f"{x + 16} {y -96}"
+                    return f"{x + 16} {y + 96}"
             elif(rot == 90):
                 if(terminal == "A"):
                     return f"{x - 96} {y + 16}"
@@ -93,9 +93,9 @@ class CParser():
         elif(POIType == POITypes.Capacitor):
             if(rot == 0):
                 if(terminal == "A"):
-                    return f"{x + 16} {y + 16}"
+                    return f"{x + 16} {y}"
                 elif(terminal == "B"):
-                    return f"{x + 16} {y -64}"
+                    return f"{x + 16} {y + 64}"
             elif(rot == 90):
                 if(terminal == "A"):
                     return f"{x - 64} {y + 16}"
@@ -122,8 +122,10 @@ class CParser():
                 if(terminal == "A"):
                     return f"{x - 64} {y + 16}"
                 elif(terminal == "B"):
-                    return f"{x + 80} {y + 16}"
-        elif(POIType == POITypes.Corner or POIType == POITypes.Junction or POIType == POITypes.Cross or POIType == POITypes.GND):
+                    return f"{x} {y + 16}"
+        elif(POIType == POITypes.Corner or POIType == POITypes.Junction or POIType == POITypes.Cross):
+            return f"{x+16} {y+16}"
+        elif(POIType == POITypes.GND):
             return f"{x} {y}"
         return "0 0"
 
@@ -132,10 +134,9 @@ class CParser():
         startY = startPOI.position[1]
         rot = startPOI.rotation
         if(terminal == "A" and startPOI.terminalA is not None):
-            return f"WIRE {self.__GeneratePartOffset(startPOI.type, startX, startY, startPOI.rotation, terminal)} {self.__GeneratePartOffset(startPOI.terminalA.type, startPOI.terminalA.position[0], startPOI.terminalA.position[1], startPOI.terminalA.rotation , 'A')}"
+            return f"WIRE {self.__GeneratePartOffset(startPOI.type, startX, startY, startPOI.rotation, 'A')} {self.__GeneratePartOffset(startPOI.terminalA.type, startPOI.terminalA.position[0], startPOI.terminalA.position[1], startPOI.terminalA.rotation , 'A')}"
         elif(terminal == "B" and startPOI.terminalB is not None):
-            print(self.__GeneratePartOffset(startPOI.type, startX, startY, startPOI.rotation, terminal))
-            return f"WIRE {self.__GeneratePartOffset(startPOI.type, startX, startY, startPOI.rotation, terminal)} {self.__GeneratePartOffset(startPOI.terminalB.type, startPOI.terminalB.position[0], startPOI.terminalB.position[1], startPOI.terminalB.rotation, 'B')}"
+            return f"WIRE {self.__GeneratePartOffset(startPOI.type, startX, startY, startPOI.rotation, 'B')} {self.__GeneratePartOffset(startPOI.terminalB.type, startPOI.terminalB.position[0], startPOI.terminalB.position[1], startPOI.terminalB.rotation, 'B')}"
         else:
             return ""
         
@@ -161,7 +162,6 @@ class CParser():
         with open(save_path, 'w') as f:
             f.write(self.header + "\n")
             for poi in self.graph:
-                if(not (poi.type == POITypes.Corner or poi.type == POITypes.Junction)): # WE DONT WRITE CORNERS AND JUNCTIONS
                     f.write(self.__Poi2Str(poi) + "\n")
                     f.write(self.__GenerateWire(poi, "A") + "\n")
                     f.write(self.__GenerateWire(poi, "B") + "\n")
