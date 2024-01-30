@@ -68,13 +68,13 @@ class CParser():
             POI as line in text format corresponding to LTSPICE
             syntax.
         """
-        posx = str(poi.position[0])
-        posy = str(poi.position[1])
+        posx = poi.position[0]
+        posy = poi.position[1]
         rot = str(poi.rotation)
         if poi.type.value <= POITypes.Diode.value:
             return f"SYMBOL {self.part_aliases[f'{poi.type}']} {posx} {posy} R{rot}"
         if poi.type.value == POITypes.GND.value:
-            return f"FLAG {posx} {posy} {self.part_aliases[f'{poi.type}']}"
+            return f"FLAG {posx + 16} {posy} {self.part_aliases[f'{poi.type}']}"
         else:
             return ""
 
@@ -126,7 +126,7 @@ class CParser():
         elif(POIType == POITypes.Corner or POIType == POITypes.Junction or POIType == POITypes.Cross):
             return f"{x+16} {y+16}"
         elif(POIType == POITypes.GND):
-            return f"{x} {y}"
+            return f"{x + 16} {y}"
         return "0 0"
 
     def __GenerateWire(self, startPOI: POI, terminal: str) -> str:
