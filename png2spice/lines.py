@@ -1,3 +1,10 @@
+"""
+This submodule of **png2spice** deals with the extraction of horizontal
+and vertical lines of a given image of an electrical schematic. Additionally,
+the obtained lines also yield the positions of the components, which are saved
+to a temporary folder for later classification by SPICEnet.
+"""
+
 from parameters import P2SParameters
 import cv2
 import numpy as np
