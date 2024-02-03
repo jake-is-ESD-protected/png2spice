@@ -106,7 +106,7 @@ class CParser():
                 if(terminal == "A"):
                     return f"{x + 16} {y + 16}"
                 elif(terminal == "B"):
-                    return f"{x + 16} {y +96}"
+                    return f"{x + 16} {y + 96}"
             elif(rot == 90):
                 if(terminal == "A"):
                     return f"{x - 96} {y + 16}"
