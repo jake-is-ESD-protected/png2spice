@@ -36,7 +36,7 @@ class POI:
    def __init__(self, val, pos, typ, name):
       self.type = typ
       self.position = pos
-      self.rotation = 0
+      self.rotation = 90
       self.terminalA = None
       self.terminalB = None
       self.terminalC = None
