@@ -39,12 +39,25 @@ class CParser():
         posx = str(poi.position[0])
         posy = str(poi.position[1])
         rot = str(poi.rotation)
+        line = ""
         if poi.type.value <= POITypes.Diode.value:
-            return f"SYMBOL {self.part_aliases[f'{poi.type}']} {posx} {posy} R{rot}"
+            line = f"SYMBOL {self.part_aliases[f'{poi.type}']} {posx} {posy} R{rot}"
         if poi.type.value == POITypes.GND.value:
-            return f"FLAG {posx} {posy} {self.part_aliases[f'{poi.type}']}"
-        else:
-            return ""
+            line = f"FLAG {posx} {posy} {self.part_aliases[f'{poi.type}']}"
+        return line
+
+    def __Wires2Str(self):
+        wireStr = ""
+        terminalsStr = ["terminalA", "terminalB", "terminalC", "terminalD"]
+        terminalLinesStr = ["terminalALine", "terminalBLine", "terminalCLine", "terminalDLine"]
+        
+        for poi in self.graph:
+            terminals = [getattr(poi, str(terminal)) for terminal in terminalsStr]
+            terminalLines = [getattr(poi, str(terminalLine)) for terminalLine in terminalLinesStr]
+            for terminal, terminalLine in zip(terminals, terminalLines):
+                if terminal:
+                    wireStr += f"WIRE {poi.position[0]} {poi.position[1]} {terminalLine[0]} {terminalLine[1]}\n"
+        return wireStr
 
     def Graph2Asc(self, save_path: str="./output.asc", graph: List[POI]=None):
         """
@@ -67,6 +80,7 @@ class CParser():
             self.graph = graph
         with open(save_path, 'w') as f:
             f.write(self.header + "\n")
+            f.write(self.__Wires2Str() + "\n")
             for poi in self.graph:
                 f.write(self.__Poi2Str(poi) + "\n")
             
