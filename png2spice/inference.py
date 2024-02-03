@@ -109,13 +109,17 @@ class CSPICEnet:
             predDict[label] = classDict
 
         if show:
-            fig, axs = plt.subplots(nrows=int(imageDisplayGenerator.n/4), ncols=4, figsize=(40, 20))
+            rowColSplit = int(np.sqrt(int(imageDisplayGenerator.n)))
+            fig, axs = plt.subplots(nrows=rowColSplit, ncols=rowColSplit, figsize=(40, 20))
             ind = 0
             for ax1 in axs:
                 for ax2 in ax1:
                     ax2.imshow(batch_images[ind])
-                    partsFormat = " ".join([part[:2] + "%.2f\n" % preds[ind][i] for i, part in enumerate(self.classlist)])
-                    ax2.set_title(partsFormat, fontsize=10)
+                    partsFormat = " ".join([part[:3] + "%.2f\n" % preds[ind][i] for i, part in enumerate(self.classlist)])
+                    ax2.text(1.05, 0.5, partsFormat, verticalalignment='center', horizontalalignment='left', transform=ax2.transAxes)
+                    ax2.set_title(str(fileLabels[ind]))
+                    ax2.set_xticks([])
+                    ax2.set_yticks([])
                     ind += 1
 
             fig.suptitle('Component Classifaction')
@@ -129,7 +133,8 @@ if __name__ == "__main__":
     import matplotlib
     matplotlib.use("TkAgg")
     import matplotlib.pyplot as plt
+    from pprint import pprint
 
     SPICEnet = CSPICEnet("../SPICEnet")
     p = SPICEnet.predict(join(P2SParameters.partSnapshotDir, ".."), show=True)
-    # print(SPICEnet.predictRaw(join(P2SParameters.partSnapshotDir, "..")))
+    pprint(p)
