@@ -68,7 +68,7 @@ def normalizeImageData(img: cv2.typing.MatLike) -> cv2.typing.MatLike:
     return img
 
 
-def getHoughLines(img: cv2.typing.MatLike, rmDuplicates: bool=True, show: bool=False) -> np.ndarray:
+def getHoughLines(img: cv2.typing.MatLike, rmDuplicates: bool=True, show: bool=False, spath: str=P2SParameters.partSnapshotDir) -> np.ndarray:
     """
     BRIEF
     -----
@@ -84,6 +84,9 @@ def getHoughLines(img: cv2.typing.MatLike, rmDuplicates: bool=True, show: bool=F
     `show`:
         `bool`. Show the detected lines over the input image. The used plotting
         backend has to be configured outside this function.
+    `spath`:
+        `str`. Path to save the screenshots of POIs derived from the Hough
+        lines.
 
     RETURNS
     -------
@@ -123,8 +126,8 @@ def getHoughLines(img: cv2.typing.MatLike, rmDuplicates: bool=True, show: bool=F
     for count, line in enumerate(lines):
         pt1 = (line[0],line[1])
         pt2 = (line[2],line[3])
-        saveImageFromPos(img.copy(), pt1[0],pt1[1], imgSliceSize, str(count) + 'A')
-        saveImageFromPos(img.copy(), pt2[0],pt2[1], imgSliceSize, str(count) + 'B')
+        saveImageFromPos(img.copy(), pt1[0],pt1[1], imgSliceSize, str(count) + 'A', spath)
+        saveImageFromPos(img.copy(), pt2[0],pt2[1], imgSliceSize, str(count) + 'B', spath)
         if show:
             cv2.line(linesImage, pt1, pt2, (0,0,255), 4)
             cv2.circle(linesImage, pt1, 2, (255,0,0), 3)
@@ -141,7 +144,7 @@ def getHoughLines(img: cv2.typing.MatLike, rmDuplicates: bool=True, show: bool=F
 
 
 
-def saveImageFromPos(img: cv2.typing.MatLike, x: int, y: int, winSize: int, name: str):
+def saveImageFromPos(img: cv2.typing.MatLike, x: int, y: int, winSize: int, name: str, spath: str):
     """
     BRIEF
     -----
@@ -159,25 +162,20 @@ def saveImageFromPos(img: cv2.typing.MatLike, x: int, y: int, winSize: int, name
         `int`. Size of square box in pixels.
     `name`:
         `str`. Name and therefore destination path for image.
-
-    NOTES
-    -----
-    Contains **P2S parameters** `partSnapshotDir`.
-    See `png2spice.parameters`. 
+    `spath`:
+        `str`. Path to save location.
     """
-    dirPath = P2SParameters.partSnapshotDir
-
-    if not os.path.exists(dirPath):
+    if not os.path.exists(spath):
         try:
-            os.makedirs(dirPath)
+            os.makedirs(spath)
         except OSError as e:
-            print(f"Error creating subdirectory {dirPath}: {e}")
+            print(f"Error creating subdirectory {spath}: {e}")
 
     yMax, xMax = img.shape
     if(x+int(winSize/2) > xMax or y+int(winSize/2) > yMax or x-int(winSize/2) < 0 or y-int(winSize/2) < 0):
         return
     img = img[y-int(winSize/2):y+int(winSize/2), x-int(winSize/2):x+int(winSize/2)]
-    fname = join(dirPath, str(name) + ".png")
+    fname = join(spath, str(name) + ".png")
     cv2.imwrite(fname, img)
 
 
