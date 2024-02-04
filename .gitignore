@@ -162,3 +162,5 @@ cython_debug/
 .vscode
 output
 *.asc
+.temp
+input.png
