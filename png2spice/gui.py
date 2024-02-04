@@ -8,28 +8,150 @@ Tkinter SHOULD be a default install with any Python installation.
 """
 
 import tkinter as tk
-from PIL import ImageGrab
+from tkinter import filedialog, ttk
+from PIL import ImageGrab, ImageTk, Image
 import io
+import time  # For simulating a long-running task
+import lines
+import inference
+from os.path import join, exists
+import os
 
 class ScreenshotApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Screenshot Viewer Template")
-        self.root.geometry("300x200")
-        self.image_label = tk.Label(root)
-        self.image_label.pack(pady=10)
+        self.root.geometry("800x600")
+
+        # Left panel
+        ## base frame
+        self.left_frame = tk.Frame(root, bd=2, relief="solid")
+        self.left_frame.place(relx=0, rely=0, relwidth=0.8, relheight=1)
+        
+        ## image frame
+        self.image_label = tk.Label(self.left_frame)
+        self.image_label.place(relx=0.5, rely=0.5, anchor="center")
+
+        # Right panel
+        ## base frame
+        self.right_frame = tk.Frame(root, bd=2, relief="solid")
+        self.right_frame.place(relx=0.8, rely=0, relwidth=0.2, relheight=1)
+        
+        ## Analyze button
+        self.analyze_button = tk.Button(self.right_frame, text="Analyze", command=self.analyze)
+        self.analyze_button.pack(pady=10)
+        
+        ## Path select button
+        self.folder_path_button = tk.Button(self.right_frame, text="Select Folder", command=self.open_folder_dialog)
+        self.folder_path_button.pack(pady=10)
+
+        ## Checkbox 1
+        self.checkbox1 = tk.Checkbutton(self.right_frame, text="Checkbox 1")
+        self.checkbox1.pack(pady=10)
+
+        ## Checkbox 2
+        self.checkbox2 = tk.Checkbutton(self.right_frame, text="Checkbox 2")
+        self.checkbox2.pack(pady=10)
+
+        ## key-stroke callback registration
         self.root.bind("<Control-v>", self.on_ctrl_v)
+
+        ## run-time variables
+        self.folder_path = os.getcwd()
+        self.input_path = join(self.folder_path, "input.png")
+
 
     def on_ctrl_v(self, event):
         screenshot = ImageGrab.grabclipboard()
         if screenshot:
+            max_width, max_height = self.left_frame.winfo_width() - 40, self.left_frame.winfo_height() - 40
+            original_width, original_height = screenshot.size
+            ratio = min(max_width/original_width, max_height/original_height)
+            new_width, new_height = int(original_width*ratio), int(original_height*ratio)
+            screenshot = screenshot.resize((new_width, new_height))
+
             image_bytes = io.BytesIO()
             screenshot.save(image_bytes, format='PNG')
-            image = tk.PhotoImage(data=image_bytes.getvalue())
+            screenshot.save(self.input_path, format="PNG")
+            image = ImageTk.PhotoImage(data=image_bytes.getvalue())
             self.image_label.config(image=image)
             self.image_label.image = image
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = ScreenshotApp(root)
-    root.mainloop()
+            self.image_label.place(relx=0.5, rely=0.5, anchor="center")
+
+
+    def open_folder_dialog(self):
+        selected_path = filedialog.askdirectory()
+        if selected_path:
+            self.folder_path = selected_path
+            self.poi_image_path = join(self.folder_path, "POIs", "snapshots")
+        print("Selected folder:", self.folder_path)
+
+
+    def analyze(self):
+        if not exists(self.input_path):
+            Warning("No image in buffer!")
+            return
+        
+        stages = [self.stage1, self.stage2, self.stage3, self.stage4]
+        stage_descriptors = ["Normalizing image",
+                             "Extracting lines",
+                             "Launching SPICEnet",
+                             "Classify POIs"]
+        i = 0
+        step = 100 // len(stages)
+        progress_dialog = ProgressDialog(self.root)
+
+        for stage, label in zip(stages, stage_descriptors):
+            progress_dialog.update_progress(i, f"{label}... {i}%")
+            stage()
+            i += step
+        
+        progress_dialog.destroy()
+
+    def stage1(self):
+        img = lines.imageDataFromPath(self.input_path)
+        self.img = lines.normalizeImageData(img)
+        os.remove(self.input_path)
+
+    def stage2(self):
+        if not os.path.exists(self.poi_image_path):
+            try:
+                os.makedirs(self.poi_image_path)
+            except OSError as e:
+                print(f"Error creating subdirectory {self.poi_image_path}: {e}")
+        HLs = lines.getHoughLines(self.img, spath=self.folder_path)
+
+    def stage3(self):
+        self.SPICEnet = inference.CSPICEnet(join(os.getcwd(), "SPICEnet"))
+
+    def stage4(self):
+        preds = self.SPICEnet.predict(self.folder_path)
+        print(preds)
+
+
+
+class ProgressDialog(tk.Toplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.title("Progress")
+        self.geometry("300x100")
+
+        self.progress = ttk.Progressbar(self, length=200, mode="determinate")
+        self.progress.pack(pady=20)
+
+        self.progress_text = tk.Label(self, text="")
+        self.progress_text.pack()
+
+        self.grab_set()  # Make the dialog modal
+
+    def update_progress(self, value, text):
+        self.progress["value"] = value
+        self.progress_text["text"] = text
+        self.update()
+
+
+root = tk.Tk()
+app = ScreenshotApp(root)
+root.mainloop()
