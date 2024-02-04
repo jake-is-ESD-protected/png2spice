@@ -11,11 +11,12 @@ import tkinter as tk
 from tkinter import filedialog, ttk
 from PIL import ImageGrab, ImageTk, Image
 import io
-import time  # For simulating a long-running task
 import lines
 import inference
 from os.path import join, exists
 import os
+from graphing import CGraph
+from parsing import CParser
 
 class ScreenshotApp:
     def __init__(self, root):
@@ -93,16 +94,19 @@ class ScreenshotApp:
             Warning("No image in buffer!")
             return
         
-        stages = [self.stage1, self.stage2, self.stage3, self.stage4]
-        stage_descriptors = ["Normalizing image",
-                             "Extracting lines",
-                             "Launching SPICEnet",
-                             "Classify POIs"]
+        stages = dict({
+            "Normalizing image": self.stage1,
+            "Extracting lines": self.stage2,
+            "Launching SPICEnet": self.stage3,
+            "Classify POIs": self.stage4,
+            "Building graph": self.stage5,
+            "Parsing and exporting": self.stage6})
+        
         i = 0
-        step = 100 // len(stages)
+        step = 100 // len(stages.keys())
         progress_dialog = ProgressDialog(self.root)
 
-        for stage, label in zip(stages, stage_descriptors):
+        for stage, label in zip(list(stages.values()), list(stages.keys())):
             progress_dialog.update_progress(i, f"{label}... {i}%")
             stage()
             i += step
@@ -110,24 +114,63 @@ class ScreenshotApp:
         progress_dialog.destroy()
 
     def stage1(self):
+        """
+        Data import and normalization stage.
+        """
         img = lines.imageDataFromPath(self.input_path)
         self.img = lines.normalizeImageData(img)
         os.remove(self.input_path)
 
+
     def stage2(self):
+        """
+        Line extraction and POI localization stage. 
+        """
         if not os.path.exists(self.poi_image_path):
             try:
                 os.makedirs(self.poi_image_path)
             except OSError as e:
                 print(f"Error creating subdirectory {self.poi_image_path}: {e}")
-        HLs = lines.getHoughLines(self.img, spath=self.folder_path)
+        self.HLs = lines.getHoughLines(self.img, spath=self.poi_image_path)
+
 
     def stage3(self):
+        """
+        SPICEnet instanciation stage.
+        """
         self.SPICEnet = inference.CSPICEnet(join(os.getcwd(), "SPICEnet"))
 
+
     def stage4(self):
-        preds = self.SPICEnet.predict(self.folder_path)
-        print(preds)
+        """
+        SPICEnet inference stage.
+        """
+        self.preds, self.ocrs = self.SPICEnet.predict(self.folder_path)
+    
+
+    def stage5(self):
+        """
+        Graph building stage.
+        """
+        self.graph = CGraph(self.HLs, self.preds, self.ocrs)
+        self.graph.rmDuplicates()
+        self.graph.link()
+        self.graph.analyzeRotations()
+        self.graph.snapToGrid()
+        self.graph.alignToGrid()
+    
+
+    def stage6(self):
+        """
+        Parsing and export stage.
+        """
+        parser = CParser(self.graph)
+        output_path = join(self.folder_path, "output.asc")
+        dir = os.listdir(os.getcwd())
+        if(output_path in dir):
+            os.remove(os.path.join(os.getcwd(), output_path))
+
+        parser.Graph2Asc(output_path)
 
 
 
