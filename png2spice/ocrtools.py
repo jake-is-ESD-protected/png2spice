@@ -3,6 +3,7 @@ import pytesseract
 import numpy as np
 from scipy.stats import gaussian_kde
 from IPython.display import display
+import re
 
 def localize_part_OCR(img_path: str, threshold: int=5, get_box_heights=False, show=False) -> list:
     """
@@ -76,6 +77,33 @@ def localize_part_OCR(img_path: str, threshold: int=5, get_box_heights=False, sh
         return valid_boxes, selected_values
     return valid_boxes
     
+
+def read_part_OCR(img_path: str):
+    """
+    BRIEF
+    -----
+    Use OCR to read the letters on the schematic.
+
+    PARAMS
+    ------
+    `img_path`: `str`
+        Path to image.
+
+    RETURNS
+    -------
+    `str`:
+        String containing the found text if present.
+
+    NOTES
+    -----
+    The searched letters depend on the regex listed below.
+    """
+    result = pytesseract.image_to_string(Image.open(img_path))
+    resultPostRegex = re.search(r"[RCDL](\d+)", result, re.IGNORECASE)
+    if(resultPostRegex != None):
+        resultPostRegex = resultPostRegex.group().capitalize()
+    return resultPostRegex
+
 
 def get_scaling_from_OCR(img_path: str, threshold: int=5, letter_to_part_ratio: float=1/3) -> float:
     """
