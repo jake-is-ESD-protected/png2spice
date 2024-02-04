@@ -1,9 +1,14 @@
-from .POI import POI, POITypes
+from POI import POI, POITypes
 from typing import List
+from graphing import CGraph
+from typing import Union
 
 class CParser():
-    def __init__(self, graph: List[POI]) -> None:
-        self.graph = graph
+    def __init__(self, graph: Union[CGraph, List[POI]]) -> None:
+        if isinstance(graph, CGraph):
+            self.graphContents = graph.looseGraph
+        else:
+            self.graphContents = graph
         self.header = "SHEET 1 1000 1000"
         self.part_aliases = dict({
             f"{POITypes.Resistor}": "res",
@@ -83,7 +88,7 @@ class CParser():
         terminalsStr = ["terminalA", "terminalB", "terminalC", "terminalD"]
         terminalLinesStr = ["terminalALine", "terminalBLine", "terminalCLine", "terminalDLine"]
         
-        for poi in self.graph:
+        for poi in self.graphContents:
             terminals = [getattr(poi, str(terminal)) for terminal in terminalsStr]
             terminalLines = [getattr(poi, str(terminalLine)) for terminalLine in terminalLinesStr]
             for terminal, terminalLine in zip(terminals, terminalLines):
@@ -156,7 +161,7 @@ class CParser():
         else:
             return ""
         
-    def Graph2Asc(self, save_path: str="./output.asc", graph: List[POI]=None):
+    def Graph2Asc(self, save_path: str="./output.asc", graph: Union[CGraph, List[POI]]=None):
         """
         BRIEF
         -----
@@ -174,11 +179,14 @@ class CParser():
             used. Default is `None`.
         """
         if graph:
-            self.graph = graph
+            if isinstance(graph, CGraph):
+                self.graphContents = graph.looseGraph
+            else:
+                self.graphContents = graph
         with open(save_path, 'w') as f:
             f.write(self.header + "\n")
             f.write(self.__Wires2Str() + "\n")
-            for poi in self.graph:
+            for poi in self.graphContents:
                 if(not (poi.type == POITypes.Corner or poi.type == POITypes.Junction)): # WE DONT WRITE CORNERS AND JUNCTIONS
                     f.write(self.__Poi2Str(poi) + "\n")
                     f.write(self.__GenerateWire(poi, "A") + "\n")
