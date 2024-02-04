@@ -16,6 +16,7 @@ import os
 import re
 from PIL import Image
 import json
+from ocrtools import read_part_OCR
 
 
 class CSPICEnet:
@@ -68,7 +69,7 @@ class CSPICEnet:
         return pred
     
 
-    def predict(self, path: str, show: bool=False):
+    def predict(self, path: str, ocr: bool=True, show: bool=False):
         """
         BRIEF
         -----
@@ -80,6 +81,9 @@ class CSPICEnet:
             `str`. Path to the folder containing the data.
             Since `keras` is used, the folder above the folder(s)
             containing the data is expected.
+        `ocr`:
+            `bool`. Perform OCR on the POI snapshots in addition
+            to the classification.
         `show`:
             `bool`. Show a plot listing all detected POIs and their
             classifications. The used plotting backend has to be configured 
@@ -87,9 +91,10 @@ class CSPICEnet:
         
         RETURNS
         -------
-        `dict`. Dict of dicts. Upper dict contains the labels of the POIs and
+        `dict`(1), [`dict`](2). Dict of dicts (1). Upper dict contains the labels of the POIs and
         their sub-dicts. These consist of the component class names and their
-        probability per class.
+        probability per class. If `ocr` is set to `True`, a dict (2) of the OCR results
+        is returned as well. Both dicts have the same keys.
         """
         preds = self.__predictRaw(path)
         imageDisplayGenerator = self.dataGenerator.flow_from_directory(
@@ -98,6 +103,13 @@ class CSPICEnet:
             shuffle=False,
             batch_size=100)
         fileLabels =  [os.path.basename(s).replace('.png', '') for s in imageDisplayGenerator.filenames]
+
+        if ocr:
+            OCRNameResults = dict()
+            for file, label in zip(imageDisplayGenerator.filenames, fileLabels):
+                partOcr = read_part_OCR(join(path, file))
+                if partOcr != None:
+                    OCRNameResults[f"{label}"] = partOcr
 
         batch_images = imageDisplayGenerator.next()[0]
 
@@ -125,8 +137,10 @@ class CSPICEnet:
             fig.suptitle('Component Classifaction')
             plt.tight_layout()
             plt.show()
-        
-        return predDict
+        if ocr:
+            return predDict, OCRNameResults
+        else:
+            return predDict
     
 
 if __name__ == "__main__":
