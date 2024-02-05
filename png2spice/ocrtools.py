@@ -1,5 +1,6 @@
 from PIL import Image, ImageDraw
 import pytesseract
+pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract-OCR/tesseract.exe'
 import numpy as np
 from scipy.stats import gaussian_kde
 from IPython.display import display

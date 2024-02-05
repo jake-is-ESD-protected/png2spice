@@ -71,7 +71,7 @@ class CGraph:
                     # else:
                     #    lG.terminalA = lG2
     
-    def angle_of_line(p1, p2):
+    def angle_of_line(self, p1, p2):
         return math.degrees(math.atan2(-(p2[1]-p1[1]), p2[0]-p1[0]))
 
     def analyzeRotations(self):
@@ -113,7 +113,7 @@ class CGraph:
                             poi2.position = (poi2.position[0], poi1.position[1])
                     else:
                         print("[GRID ALIGN WARN]: Rotation is higher than 90°")
-                if(poi1.type == POI.POITypes.Corner or poi1.type == POI.POITypes.Junction or poi1.type == POI.POITypes.GND):
+                if(poi1.type == POITypes.Corner or poi1.type == POITypes.Junction or poi1.type == POITypes.GND):
                     if abs(poi1.position[0] - poi2.position[0]) < margin[0]:
                         poi2.position = (poi1.position[0], poi2.position[1])
                     if abs(poi1.position[1] - poi2.position[1]) < margin[1]:
