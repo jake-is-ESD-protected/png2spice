@@ -1,9 +1,13 @@
 from POI import POI, POITypes
-from typing import List
+from graphing import CGraph
+from typing import List, Union
 
 class CParser():
-    def __init__(self, graph: List[POI]) -> None:
-        self.graph = graph
+    def __init__(self, graph: Union[CGraph, List[POI]]) -> None:
+        if isinstance(graph, CGraph):
+            self.graphContents = graph.looseGraph
+        else:
+            self.graphContents = graph
         self.header = "SHEET 1 1000 1000"
         self.part_aliases = dict({
             f"{POITypes.Resistor}": "res",
@@ -158,10 +162,13 @@ class CParser():
             used. Default is `None`.
         """
         if graph:
-            self.graph = graph
+            if isinstance(graph, CGraph):
+                self.graphContents = graph.looseGraph
+            else:
+                self.graphContents = graph
         with open(save_path, 'w') as f:
             f.write(self.header + "\n")
-            for poi in self.graph:
+            for poi in self.graphContents:
                     f.write(self.__Poi2Str(poi) + "\n")
                     f.write(self.__GenerateWire(poi, "A") + "\n")
                     f.write(self.__GenerateWire(poi, "B") + "\n")
