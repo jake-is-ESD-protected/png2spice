@@ -1,4 +1,4 @@
-from .POI import POI, POITypes
+from POI import POI, POITypes
 from typing import List
 
 class CParser():

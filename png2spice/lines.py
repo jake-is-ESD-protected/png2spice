@@ -57,7 +57,7 @@ def normalizeImageData(img):
                            255, 
                            cv2.THRESH_BINARY)
     
-    pad = P2SParameters.imagePadding * P2SParameters.scalingFactor
+    pad = int(P2SParameters.imagePadding * P2SParameters.scalingFactor)
     img = cv2.copyMakeBorder(img, 
                             pad,
                             pad,
@@ -100,11 +100,11 @@ def getHoughLines(img, rmDuplicates: bool=True, show: bool=False, spath: str=P2S
     See `png2spice.parameters`. 
     """
     cannyThresh = P2SParameters.cannyThreshold
-    HLThresh = P2SParameters.HLThreshold * P2SParameters.scalingFactor
-    HLMinLineLen = P2SParameters.HLMinLineLength * P2SParameters.scalingFactor
+    HLThresh = int(P2SParameters.HLThreshold * P2SParameters.scalingFactor)
+    HLMinLineLen = int(P2SParameters.HLMinLineLength * P2SParameters.scalingFactor)
     HLmaxLineGap = P2SParameters.HLmaxLineGap
     HLIterations = P2SParameters.HoughIterations
-    imgSliceSize = P2SParameters.imageSliceSize * P2SParameters.scalingFactor
+    imgSliceSize = int(P2SParameters.imageSliceSize * P2SParameters.scalingFactor)
 
     linesImage = np.zeros((img.shape + (tuple([3]))), np.uint8)
     edges = cv2.Canny(img, cannyThresh, cannyThresh, None, 5)
@@ -203,7 +203,7 @@ def hasSimilairLineInList(lineList: list, line: np.ndarray):
     Contains **P2S parameters** `pointDistance`.
     See `png2spice.parameters`. 
     """
-    dist = P2SParameters.pointDistance * P2SParameters.scalingFactor
+    dist = int(P2SParameters.pointDistance * P2SParameters.scalingFactor)
     for l in lineList:
         pt1 = (l[0],l[1])
         pt2 = (l[2],l[3])

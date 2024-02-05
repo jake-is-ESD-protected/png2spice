@@ -32,7 +32,7 @@ class CGraph:
 
 
     def rmDuplicates(self):
-        v = P2SParameters.DuplicateVariance * P2SParameters.scalingFactor
+        v = int(P2SParameters.DuplicateVariance * P2SParameters.scalingFactor)
         for poi1 in self.looseGraph:
             for i, poi2 in enumerate(self.looseGraph):
                 dist = math.dist(tuple(poi1.position),tuple(poi2.position))
@@ -41,8 +41,8 @@ class CGraph:
     
 
     def link(self):
-        ComponentTerminalAVariance = P2SParameters.ComponentTerminalAVariance * P2SParameters.scalingFactor
-        ComponentTerminalBVariance = P2SParameters.ComponentTerminalBVariance * P2SParameters.scalingFactor
+        ComponentTerminalAVariance = int(P2SParameters.ComponentTerminalAVariance * P2SParameters.scalingFactor)
+        ComponentTerminalBVariance = int(P2SParameters.ComponentTerminalBVariance * P2SParameters.scalingFactor)
         for lG in self.looseGraph:
             for line in self.lines:
                 # if((lG.position == line[0:2]).all()):

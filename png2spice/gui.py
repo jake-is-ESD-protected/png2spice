@@ -63,6 +63,9 @@ class ScreenshotApp:
         self.folder_path = os.getcwd()
         self.input_path = join(self.folder_path, "input.png")
 
+        self.poi_image_path = join(os.getcwd(), "temp", "randomSubFolder")
+        os.makedirs(self.poi_image_path)
+
 
     def on_ctrl_v(self, event):
         screenshot = ImageGrab.grabclipboard()
@@ -120,9 +123,12 @@ class ScreenshotApp:
         """
         Data import and normalization stage.
         """
-
-        scalingFactor = get_scaling_from_OCR(self.input_path, threshold=5, letter_to_part_ratio=1/3)
-        P2SParameters.setScalingFactor(scalingFactor * -0.526 + 0.088)
+        print(self.input_path)
+        scalingFactor = get_scaling_from_OCR(self.input_path, threshold=15, letter_to_part_ratio=1/3)
+        print("SCALING_FACTOR", scalingFactor)
+        #P2SParameters.setScalingFactor(scalingFactor * -0.526 + 0.088)
+        P2SParameters.setScalingFactor(0.06)
+        print("SCALING_FACTOR", P2SParameters.scalingFactor)
 
         img = lines.imageDataFromPath(self.input_path)
         self.img = lines.normalizeImageData(img)

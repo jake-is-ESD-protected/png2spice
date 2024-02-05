@@ -32,7 +32,7 @@ class CSPICEnet:
             `str`. Path to the saved SPICEnet model in `.h5` format.
 
         """
-        self.model = load_model(join(path, "SPICEnet.h5"))
+        self.model = load_model("C:/Users/kriso/Documents/Uni TU Berlin/3 Sem/PNG2Spice/SPICEnet/SPICEnet.h5")
         self.imgResize = int(P2SParameters.imageSliceSize * P2SParameters.scalingFactor * 1.3)
         self.dataGenerator = ImageDataGenerator(
             rescale=1./255

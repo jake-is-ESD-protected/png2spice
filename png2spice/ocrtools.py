@@ -135,5 +135,6 @@ def get_scaling_from_OCR(img_path: str, threshold: int=5, letter_to_part_ratio: 
     image = Image.open(img_path)
     width, _ = image.size
     _, selected_values = localize_part_OCR(img_path, threshold, get_box_heights=True, show=False)
+    print(selected_values)
     result_mean = np.mean(selected_values)
     return (1/letter_to_part_ratio) * result_mean / width
