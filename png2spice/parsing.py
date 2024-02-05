@@ -104,7 +104,7 @@ class CParser():
                 if(terminal == "A"):
                     return f"{x - 64} {y + 16}"
                 elif(terminal == "B"):
-                    return f"{x + 48} {y + 16}"
+                    return f"{x } {y + 16}"
         elif(POIType == POITypes.Inductor):
             if(rot == 0):
                 if(terminal == "A"):

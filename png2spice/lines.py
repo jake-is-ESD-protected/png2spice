@@ -105,17 +105,13 @@ def getHoughLines(img, rmDuplicates: bool=True, show: bool=False, spath: str=P2S
     HLmaxLineGap = P2SParameters.HLmaxLineGap
     HLIterations = P2SParameters.HoughIterations
     imgSliceSize = int(P2SParameters.imageSliceSize * P2SParameters.scalingFactor)
+    HoughThresholdWiggle = P2SParameters.HoughThresholdWiggle
 
-    linesImage = np.zeros((img.shape + (tuple([3]))), np.uint8)
+    linesImage = np.zeros((img.shape+(tuple([3]))), np.uint8)
     edges = cv2.Canny(img, cannyThresh, cannyThresh, None, 5)
-    
-    lines = [cv2.HoughLinesP(edges, 
-                             rho=1, 
-                             theta=np.pi/2, 
-                             threshold=HLThresh + ((i+1) * HLIterations), minLineLength=HLMinLineLen, 
-                             maxLineGap=HLmaxLineGap
-                            ).squeeze()for i in range(HLIterations)]
-    lines = np.concatenate(lines, axis=0)
+    lines = cv2.HoughLinesP(edges, rho = 1, theta = math.pi/2, threshold = HLThresh, minLineLength = HLMinLineLen , maxLineGap = HLmaxLineGap).squeeze()
+    for i in range(HLIterations-1):
+        lines = np.append(lines,cv2.HoughLinesP(edges, rho = 1, theta = math.pi/2, threshold = HLThresh + ((i+1) * HoughThresholdWiggle), minLineLength = HLMinLineLen , maxLineGap = HLmaxLineGap).squeeze(),axis=0)
 
     if rmDuplicates:
         lines = pruneLines(lines)
@@ -134,9 +130,14 @@ def getHoughLines(img, rmDuplicates: bool=True, show: bool=False, spath: str=P2S
             cv2.circle(linesImage, pt2, 2, (0,255,0), 3)
     
     if show:
+        i = 4
+
+        cv2.rectangle(linesImage, lines[i][0:2] - (imgSliceSize // 2,imgSliceSize // 2), lines[i][0:2] + (imgSliceSize // 2,imgSliceSize // 2), (255, 0, 0), 2)
         _, ax = plt.subplots()
         ax.imshow(img,cmap='gray')
         ax.imshow(linesImage, alpha=0.5)
+
+
         plt.show()
     
     return lines
@@ -165,6 +166,8 @@ def saveImageFromPos(img, x: int, y: int, winSize: int, name: str, spath: str):
     `spath`:
         `str`. Path to save location.
     """
+    
+    cv2.imwrite("fnawdawame.png", img)
     if not os.path.exists(spath):
         try:
             os.makedirs(spath)
@@ -242,8 +245,8 @@ if __name__ == "__main__":
     matplotlib.use("TkAgg")
     import matplotlib.pyplot as plt
 
-    img = imageDataFromPath(join("testSchematicsPNG", "schematic1.JPG"))
+    img = imageDataFromPath(join("testSchematicsPNG", "schematic4.JPG"))
     img = normalizeImageData(img)
-    HLs = getHoughLines(img, show=True)
+    HLs = getHoughLines(img, show=True, spath="./")
     print(f"Detected {np.shape(HLs)[0]} Hough lines")
 

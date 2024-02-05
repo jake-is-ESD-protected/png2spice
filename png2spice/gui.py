@@ -12,6 +12,7 @@ from tkinter import filedialog, ttk
 from PIL import ImageGrab, ImageTk, Image
 import io
 import lines
+import cv2
 import inference
 from os.path import join, exists
 import os
@@ -19,6 +20,7 @@ from graphing import CGraph
 from parsing import CParser
 from ocrtools import get_scaling_from_OCR
 from parameters import P2SParameters
+import numpy as np
 
 class ScreenshotApp:
     def __init__(self, root):
@@ -73,16 +75,15 @@ class ScreenshotApp:
 
     def on_ctrl_v(self, event):
         screenshot = ImageGrab.grabclipboard()
-        print(screenshot)
         if screenshot:
             max_width, max_height = self.left_frame.winfo_width() - 40, self.left_frame.winfo_height() - 40
             original_width, original_height = screenshot.size
             ratio = min(max_width/original_width, max_height/original_height)
             new_width, new_height = int(original_width*ratio), int(original_height*ratio)
-            screenshot = screenshot.resize((new_width, new_height))
+            displayScreenshot = screenshot.resize((new_width, new_height))
 
             image_bytes = io.BytesIO()
-            screenshot.save(image_bytes, format='PNG')
+            displayScreenshot.save(image_bytes, format='PNG')
             screenshot.save(self.input_path, format="PNG")
             image = ImageTk.PhotoImage(data=image_bytes.getvalue())
             self.image_label.config(image=image)
@@ -130,10 +131,11 @@ class ScreenshotApp:
         print(self.input_path)
         scalingFactor = get_scaling_from_OCR(self.input_path, threshold=15, letter_to_part_ratio=1/3)
         print("SCALING_FACTOR", scalingFactor)
-        P2SParameters.setScalingFactor(scalingFactor * -0.526 + 0.088)
-        # P2SParameters.setScalingFactor(0.06)
+        P2SParameters.setScalingFactor(scalingFactor * -0.5215 + 0.088)
+        #P2SParameters.setScalingFactor(0.05674014084507042)
         print("SCALING_FACTOR", P2SParameters.scalingFactor)
 
+        #self.input_path = join("testSchematicsPNG", "schematic4.JPG")
         img = lines.imageDataFromPath(self.input_path)
         self.img = lines.normalizeImageData(img)
         os.remove(self.input_path)
