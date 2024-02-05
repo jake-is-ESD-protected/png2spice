@@ -25,7 +25,7 @@ import numpy as np
 class ScreenshotApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Screenshot Viewer Template")
+        self.root.title("PNG2Spice")
         self.root.geometry("800x600")
 
         # Left panel
@@ -49,14 +49,6 @@ class ScreenshotApp:
         ## Path select button
         self.folder_path_button = tk.Button(self.right_frame, text="Select Folder", command=self.open_folder_dialog)
         self.folder_path_button.pack(pady=10)
-
-        ## Checkbox 1
-        self.checkbox1 = tk.Checkbutton(self.right_frame, text="Checkbox 1")
-        self.checkbox1.pack(pady=10)
-
-        ## Checkbox 2
-        self.checkbox2 = tk.Checkbutton(self.right_frame, text="Checkbox 2")
-        self.checkbox2.pack(pady=10)
 
         ## key-stroke callback registration
         self.root.bind("<Control-v>", self.on_ctrl_v)
