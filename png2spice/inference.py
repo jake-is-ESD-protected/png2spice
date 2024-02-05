@@ -33,7 +33,7 @@ class CSPICEnet:
 
         """
         self.model = load_model(join(path, "SPICEnet.h5"))
-        self.imgResize = 224
+        self.imgResize = int(P2SParameters.imageSliceSize * P2SParameters.scalingFactor * 1.3)
         self.dataGenerator = ImageDataGenerator(
             rescale=1./255
         )

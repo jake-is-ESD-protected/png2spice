@@ -1,14 +1,9 @@
-from POI import POI, POITypes
+from .POI import POI, POITypes
 from typing import List
-from graphing import CGraph
-from typing import Union
 
 class CParser():
-    def __init__(self, graph: Union[CGraph, List[POI]]) -> None:
-        if isinstance(graph, CGraph):
-            self.graphContents = graph.looseGraph
-        else:
-            self.graphContents = graph
+    def __init__(self, graph: List[POI]) -> None:
+        self.graph = graph
         self.header = "SHEET 1 1000 1000"
         self.part_aliases = dict({
             f"{POITypes.Resistor}": "res",
@@ -28,7 +23,7 @@ class CParser():
     RESISTOR VER LOWER TERMINAL Y - 96
     RESISTOR HOR LEFT X -96
     RESISTOR HOR LEFT Y +16
-    RESISTOR HOR RIGHT X +64
+    RESISTOR HOR RIGHT X -16
     RESISTOR HOR RIGHT Y +16
 
     CAPACITOR VER UPPER TERMINAL Y + 16
@@ -73,28 +68,15 @@ class CParser():
             POI as line in text format corresponding to LTSPICE
             syntax.
         """
-        posx = str(poi.position[0])
-        posy = str(poi.position[1])
+        posx = poi.position[0]
+        posy = poi.position[1]
         rot = str(poi.rotation)
-        line = ""
         if poi.type.value <= POITypes.Diode.value:
-            line = f"SYMBOL {self.part_aliases[f'{poi.type}']} {posx} {posy} R{rot}"
+            return f"SYMBOL {self.part_aliases[f'{poi.type}']} {posx} {posy} R{rot}"
         if poi.type.value == POITypes.GND.value:
-            line = f"FLAG {posx} {posy} {self.part_aliases[f'{poi.type}']}"
-        return line
-
-    def __Wires2Str(self):
-        wireStr = ""
-        terminalsStr = ["terminalA", "terminalB", "terminalC", "terminalD"]
-        terminalLinesStr = ["terminalALine", "terminalBLine", "terminalCLine", "terminalDLine"]
-        
-        for poi in self.graphContents:
-            terminals = [getattr(poi, str(terminal)) for terminal in terminalsStr]
-            terminalLines = [getattr(poi, str(terminalLine)) for terminalLine in terminalLinesStr]
-            for terminal, terminalLine in zip(terminals, terminalLines):
-                if terminal:
-                    wireStr += f"WIRE {poi.position[0]} {poi.position[1]} {terminalLine[0]} {terminalLine[1]}\n"
-        return wireStr
+            return f"FLAG {posx + 16} {posy} {self.part_aliases[f'{poi.type}']}"
+        else:
+            return ""
 
     def __GeneratePartOffset(self, POIType: POITypes, x: int, y: int, rot: int, terminal: str) -> str: # maybe make this a num
         if(POIType == POITypes.Resistor):
@@ -102,18 +84,18 @@ class CParser():
                 if(terminal == "A"):
                     return f"{x + 16} {y + 16}"
                 elif(terminal == "B"):
-                    return f"{x + 16} {y -96}"
+                    return f"{x + 16} {y + 96}"
             elif(rot == 90):
                 if(terminal == "A"):
                     return f"{x - 96} {y + 16}"
                 elif(terminal == "B"):
-                    return f"{x + 64} {y + 16}"
+                    return f"{x - 16} {y + 16}"
         elif(POIType == POITypes.Capacitor):
             if(rot == 0):
                 if(terminal == "A"):
-                    return f"{x + 16} {y + 16}"
+                    return f"{x + 16} {y}"
                 elif(terminal == "B"):
-                    return f"{x + 16} {y -64}"
+                    return f"{x + 16} {y + 64}"
             elif(rot == 90):
                 if(terminal == "A"):
                     return f"{x - 64} {y + 16}"
@@ -124,7 +106,7 @@ class CParser():
                 if(terminal == "A"):
                     return f"{x + 16} {y + 16}"
                 elif(terminal == "B"):
-                    return f"{x + 16} {y +96}"
+                    return f"{x + 16} {y + 96}"
             elif(rot == 90):
                 if(terminal == "A"):
                     return f"{x - 96} {y + 16}"
@@ -140,9 +122,11 @@ class CParser():
                 if(terminal == "A"):
                     return f"{x - 64} {y + 16}"
                 elif(terminal == "B"):
-                    return f"{x + 80} {y + 16}"
-        elif(POIType == POITypes.Corner or POIType == POITypes.Junction or POIType == POITypes.Cross or POIType == POITypes.GND):
-            return f"{x} {y}"
+                    return f"{x} {y + 16}"
+        elif(POIType == POITypes.Corner or POIType == POITypes.Junction or POIType == POITypes.Cross):
+            return f"{x+16} {y+16}"
+        elif(POIType == POITypes.GND):
+            return f"{x + 16} {y}"
         return "0 0"
 
     def __GenerateWire(self, startPOI: POI, terminal: str) -> str:
@@ -150,18 +134,13 @@ class CParser():
         startY = startPOI.position[1]
         rot = startPOI.rotation
         if(terminal == "A" and startPOI.terminalA is not None):
-            endX = startPOI.terminalA.position[0]
-            endY = startPOI.terminalA.position[1]
-            print(self.__GeneratePartOffset(startPOI.type, startX, startY, rot, terminal))
-            return f"WIRE {self.__GeneratePartOffset(startPOI.type, startX, startY, rot, terminal)} {self.__GeneratePartOffset(startPOI.terminalA.type, endX, endY, rot , terminal)}"
+            return f"WIRE {self.__GeneratePartOffset(startPOI.type, startX, startY, startPOI.rotation, 'A')} {self.__GeneratePartOffset(startPOI.terminalA.type, startPOI.terminalA.position[0], startPOI.terminalA.position[1], startPOI.terminalA.rotation , 'A')}"
         elif(terminal == "B" and startPOI.terminalB is not None):
-            endX = startPOI.terminalB.position[0]
-            endY = startPOI.terminalB.position[1]
-            return f"WIRE {self.__GeneratePartOffset(startPOI.type, startX, startY, rot, terminal)} {self.__GeneratePartOffset(startPOI.terminalB.type, endX, endY, rot, terminal)}"
+            return f"WIRE {self.__GeneratePartOffset(startPOI.type, startX, startY, startPOI.rotation, 'B')} {self.__GeneratePartOffset(startPOI.terminalB.type, startPOI.terminalB.position[0], startPOI.terminalB.position[1], startPOI.terminalB.rotation, 'B')}"
         else:
             return ""
         
-    def Graph2Asc(self, save_path: str="./output.asc", graph: Union[CGraph, List[POI]]=None):
+    def Graph2Asc(self, save_path: str="./output.asc", graph: List[POI]=None):
         """
         BRIEF
         -----
@@ -179,15 +158,10 @@ class CParser():
             used. Default is `None`.
         """
         if graph:
-            if isinstance(graph, CGraph):
-                self.graphContents = graph.looseGraph
-            else:
-                self.graphContents = graph
+            self.graph = graph
         with open(save_path, 'w') as f:
             f.write(self.header + "\n")
-            f.write(self.__Wires2Str() + "\n")
-            for poi in self.graphContents:
-                if(not (poi.type == POITypes.Corner or poi.type == POITypes.Junction)): # WE DONT WRITE CORNERS AND JUNCTIONS
+            for poi in self.graph:
                     f.write(self.__Poi2Str(poi) + "\n")
                     f.write(self.__GenerateWire(poi, "A") + "\n")
                     f.write(self.__GenerateWire(poi, "B") + "\n")

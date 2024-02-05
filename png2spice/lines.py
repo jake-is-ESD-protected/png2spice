@@ -13,7 +13,7 @@ from os.path import join
 import os
 
 
-def imageDataFromPath(path: str) -> cv2.typing.MatLike:
+def imageDataFromPath(path: str):
     """
     BRIEF
     -----
@@ -32,7 +32,7 @@ def imageDataFromPath(path: str) -> cv2.typing.MatLike:
     return cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 
 
-def normalizeImageData(img: cv2.typing.MatLike) -> cv2.typing.MatLike:
+def normalizeImageData(img):
     """
     BRIEF
     -----
@@ -57,7 +57,7 @@ def normalizeImageData(img: cv2.typing.MatLike) -> cv2.typing.MatLike:
                            255, 
                            cv2.THRESH_BINARY)
     
-    pad = P2SParameters.imagePadding
+    pad = P2SParameters.imagePadding * P2SParameters.scalingFactor
     img = cv2.copyMakeBorder(img, 
                             pad,
                             pad,
@@ -68,7 +68,7 @@ def normalizeImageData(img: cv2.typing.MatLike) -> cv2.typing.MatLike:
     return img
 
 
-def getHoughLines(img: cv2.typing.MatLike, rmDuplicates: bool=True, show: bool=False, spath: str=P2SParameters.partSnapshotDir) -> np.ndarray:
+def getHoughLines(img, rmDuplicates: bool=True, show: bool=False, spath: str=P2SParameters.partSnapshotDir) -> np.ndarray:
     """
     BRIEF
     -----
@@ -100,11 +100,11 @@ def getHoughLines(img: cv2.typing.MatLike, rmDuplicates: bool=True, show: bool=F
     See `png2spice.parameters`. 
     """
     cannyThresh = P2SParameters.cannyThreshold
-    HLThresh = P2SParameters.HLThreshold
-    HLMinLineLen = P2SParameters.HLMinLineLength
+    HLThresh = P2SParameters.HLThreshold * P2SParameters.scalingFactor
+    HLMinLineLen = P2SParameters.HLMinLineLength * P2SParameters.scalingFactor
     HLmaxLineGap = P2SParameters.HLmaxLineGap
     HLIterations = P2SParameters.HoughIterations
-    imgSliceSize = P2SParameters.imageSliceSize
+    imgSliceSize = P2SParameters.imageSliceSize * P2SParameters.scalingFactor
 
     linesImage = np.zeros((img.shape + (tuple([3]))), np.uint8)
     edges = cv2.Canny(img, cannyThresh, cannyThresh, None, 5)
@@ -114,7 +114,7 @@ def getHoughLines(img: cv2.typing.MatLike, rmDuplicates: bool=True, show: bool=F
                              theta=np.pi/2, 
                              threshold=HLThresh + ((i+1) * HLIterations), minLineLength=HLMinLineLen, 
                              maxLineGap=HLmaxLineGap
-                            ).squeeze() for i in range(HLIterations)]
+                            ).squeeze()for i in range(HLIterations)]
     lines = np.concatenate(lines, axis=0)
 
     if rmDuplicates:
@@ -144,7 +144,7 @@ def getHoughLines(img: cv2.typing.MatLike, rmDuplicates: bool=True, show: bool=F
 
 
 
-def saveImageFromPos(img: cv2.typing.MatLike, x: int, y: int, winSize: int, name: str, spath: str):
+def saveImageFromPos(img, x: int, y: int, winSize: int, name: str, spath: str):
     """
     BRIEF
     -----
@@ -203,7 +203,7 @@ def hasSimilairLineInList(lineList: list, line: np.ndarray):
     Contains **P2S parameters** `pointDistance`.
     See `png2spice.parameters`. 
     """
-    dist = P2SParameters.pointDistance
+    dist = P2SParameters.pointDistance * P2SParameters.scalingFactor
     for l in lineList:
         pt1 = (l[0],l[1])
         pt2 = (l[2],l[3])

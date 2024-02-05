@@ -17,6 +17,8 @@ from os.path import join, exists
 import os
 from graphing import CGraph
 from parsing import CParser
+from ocrtools import get_scaling_from_OCR
+from parameters import P2SParameters
 
 class ScreenshotApp:
     def __init__(self, root):
@@ -64,6 +66,7 @@ class ScreenshotApp:
 
     def on_ctrl_v(self, event):
         screenshot = ImageGrab.grabclipboard()
+        print(screenshot)
         if screenshot:
             max_width, max_height = self.left_frame.winfo_width() - 40, self.left_frame.winfo_height() - 40
             original_width, original_height = screenshot.size
@@ -117,6 +120,10 @@ class ScreenshotApp:
         """
         Data import and normalization stage.
         """
+
+        scalingFactor = get_scaling_from_OCR(self.input_path, threshold=5, letter_to_part_ratio=1/3)
+        P2SParameters.setScalingFactor(scalingFactor * -0.526 + 0.088)
+
         img = lines.imageDataFromPath(self.input_path)
         self.img = lines.normalizeImageData(img)
         os.remove(self.input_path)

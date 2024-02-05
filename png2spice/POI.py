@@ -63,7 +63,7 @@ class POI:
 
 
 def isValidPOI(classList):
-   return np.amax(classList) > 0.96
+   return np.amax(classList) > 0.95
 
 def pred2Type(POI):
    s = np.argmax(POI)
