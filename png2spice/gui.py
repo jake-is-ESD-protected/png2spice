@@ -64,7 +64,11 @@ class ScreenshotApp:
         self.input_path = join(self.folder_path, "input.png")
 
         self.poi_image_path = join(os.getcwd(), "temp", "randomSubFolder")
-        os.makedirs(self.poi_image_path)
+        if not os.path.exists(self.poi_image_path):
+            try:
+                os.makedirs(self.poi_image_path)
+            except OSError as e:
+                print(f"Error creating subdirectory {self.poi_image_path}: {e}")
 
 
     def on_ctrl_v(self, event):
