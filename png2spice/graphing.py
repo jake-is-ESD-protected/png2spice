@@ -1,3 +1,10 @@
+"""
+This submodule of **png2spice** deals with the virtual representation
+of the analyzed schematic. Here, virtual graph assembly is performed and 
+values are optimized based on an analytical approach with thresholds
+visible in `png2spice.parameters.py`. 
+"""
+
 import numpy as np
 from POI import POI, POITypes, isValidPOI, pred2Type
 import math
@@ -5,6 +12,25 @@ from parameters import P2SParameters
 
 class CGraph:
     def __init__(self, lines: np.ndarray, preds: dict, ocrs: dict) -> None:
+        """
+        BRIEF
+        -----
+        Create a graph-object which holds the detected parts and their connections.
+
+        PARAMETERS
+        ----------
+        `lines`:
+            `np.ndarray`. Line coordinates obtained from `png2spice.lines.getHoughLines`.
+        `preds`:
+            `dict`. Dictionary of predictions obtained from `png2spice.inference.CSPICEnet.predict`.
+        `ocrs`:
+            `dict`. Dictionary of OCR detections obtained from `png2spice.inference.CSPICEnet.predict`.
+
+        NOTES
+        -----
+        The graph does not hold the schematic as dimensional data. Translation into 
+        x/y coordinates is done in `png2spice.parsing.CParser`.
+        """
         self.lines = lines
         self.looseGraph = list()
         for i, line in enumerate(lines):
@@ -32,6 +58,16 @@ class CGraph:
 
 
     def rmDuplicates(self):
+        """
+        BRIEF
+        -----
+        Remove most likely duplicates in the graph via a treshold setting based on
+        proximity.
+
+        NOTES
+        -----
+        Modifies the graph's contents in place. Contains **P2S parameters** `DuplicateVariance` and `scalingFactor`.
+        """
         v = int(P2SParameters.DuplicateVariance * P2SParameters.scalingFactor)
         for poi1 in self.looseGraph:
             for i, poi2 in enumerate(self.looseGraph):
@@ -41,6 +77,15 @@ class CGraph:
     
 
     def link(self):
+        """
+        BRIEF
+        -----
+        Link components stored in graph.
+
+        NOTES
+        -----
+        Modifies the graph's contents in place. Contains **P2S parameters** `ComponentTerminalAVariance` and `ComponentTerminalBVariance`.
+        """
         ComponentTerminalAVariance = int(P2SParameters.ComponentTerminalAVariance * P2SParameters.scalingFactor)
         ComponentTerminalBVariance = int(P2SParameters.ComponentTerminalBVariance * P2SParameters.scalingFactor)
         for lG in self.looseGraph:
@@ -71,10 +116,36 @@ class CGraph:
                     # else:
                     #    lG.terminalA = lG2
     
-    def angle_of_line(self, p1, p2):
+    def angle_of_line(self, p1: tuple, p2: tuple):
+        """
+        BRIEF
+        -----
+        Get the angle between two points represented by a touple of x/y coordinates.
+
+        PARAMETERS
+        ----------
+        `p1`:
+            `tuple`. Starting point.
+        `p2`:
+            `tuple`. Ending point.
+        
+        RETURNS
+        ------
+        `float`. Angle of line relative to base x-axis.
+        """
         return math.degrees(math.atan2(-(p2[1]-p1[1]), p2[0]-p1[0]))
 
     def analyzeRotations(self):
+        """
+        BRIEF
+        -----
+        Analyze the rotations of components based on the coordinates of their
+        terminals.
+
+        NOTES
+        -----
+        Modifies the graph's contents in place. 
+        """
         skipped = [POITypes.Corner, POITypes.Junction, POITypes.Diode]
         for lG in self.looseGraph:
             if(lG.terminalALine is not None):
@@ -91,6 +162,15 @@ class CGraph:
             ###MAYBE ADD  lG.type not in skipped and
     
     def snapToGrid(self):
+        """
+        BRIEF
+        -----
+        Align all stored coordinates to a grid with a minimum step size.
+
+        NOTES
+        -----
+        Modifies the graph's contents in place. Contains **P2S parameters** `minGridStep`.
+        """
         d = P2SParameters.minGridStep
         for poi in self.looseGraph:
             x, y = tuple(poi.position)
@@ -98,6 +178,17 @@ class CGraph:
 
 
     def alignToGrid(self):
+        """
+        BRIEF
+        -----
+        Align all stored coordinates to a grid derived from the detected
+        component positions as to maintain a good looking form usual for
+        a schematic.
+
+        NOTES
+        -----
+        Modifies the graph's contents in place. Contains **P2S parameters** `minGridStep`.
+        """
         d = P2SParameters.minGridStep
         margin = (d*2, d*2)
         for poi1 in self.looseGraph:

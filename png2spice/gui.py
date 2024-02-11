@@ -24,6 +24,10 @@ import numpy as np
 
 class ScreenshotApp:
     def __init__(self, root):
+        """
+        Open a `tkinter` app for pasting and analyzing a supplied image.
+        UI elements are commented in place.
+        """
         self.root = root
         self.root.title("PNG2Spice")
         self.root.geometry("800x600")
@@ -66,6 +70,11 @@ class ScreenshotApp:
 
 
     def on_ctrl_v(self, event):
+        """
+        Upon pasting an image from the clipboard into the left panel
+        of the app, the image is saved to a temporary folder and diplayed
+        in scaled fashion inside of the app window.
+        """
         screenshot = ImageGrab.grabclipboard()
         if screenshot:
             max_width, max_height = self.left_frame.winfo_width() - 40, self.left_frame.winfo_height() - 40
@@ -85,6 +94,12 @@ class ScreenshotApp:
 
 
     def open_folder_dialog(self):
+        """
+        The `Select Folder` button will trigger this callback, which will open
+        a file dialog. Upon choosing a folder, it will be stored and used for both
+        the working resources for the classification process as well as the
+        output file. 
+        """
         selected_path = filedialog.askdirectory()
         if selected_path:
             self.folder_path = selected_path
@@ -93,6 +108,13 @@ class ScreenshotApp:
 
 
     def analyze(self):
+        """
+        The `Analyze` button will trigger this callback. At first, the temporary
+        image stored in `on_ctrl_v()` will be consumed. Then, the process will walk 
+        through 6 stages described below in the `dict` `stages`. Each stage updates
+        a progress bar. The stages are described in detail in the paper for this
+        project.
+        """
         if not exists(self.input_path):
             Warning("No image in buffer!")
             return
@@ -187,6 +209,10 @@ class ScreenshotApp:
 
 class ProgressDialog(tk.Toplevel):
     def __init__(self, parent):
+        """
+        Progress bar pop-up for the `analyze()` function. Displays the progress as
+        percent and descriptions of the stages.
+        """
         super().__init__(parent)
 
         self.title("Progress")
@@ -198,7 +224,7 @@ class ProgressDialog(tk.Toplevel):
         self.progress_text = tk.Label(self, text="")
         self.progress_text.pack()
 
-        self.grab_set()  # Make the dialog modal
+        self.grab_set()
 
     def update_progress(self, value, text):
         self.progress["value"] = value

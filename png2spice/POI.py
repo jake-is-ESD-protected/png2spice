@@ -1,3 +1,8 @@
+"""
+This submodule of **png2spice** defines the points of interest (POIs)
+by which the virtual graph of components is organized. 
+"""
+
 import numpy as np
 from enum import Enum
 

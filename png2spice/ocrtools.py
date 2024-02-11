@@ -1,6 +1,14 @@
+"""
+This submodule of **png2spice** utilizes OCR from `pytesseract` to obtain 
+both an estimated "size" (as in 'relation of component size to image size')
+of the supplied schematic image and indicators for component values and types.
+This of course needs an installation of `pytesseract` WHICH NEEDS TO BE IN
+THE `PATH` VARIABLE!
+"""
+
 from PIL import Image, ImageDraw
 import pytesseract
-pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract-OCR/tesseract.exe'
+#pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract-OCR/tesseract.exe'
 import numpy as np
 from scipy.stats import gaussian_kde
 from IPython.display import display

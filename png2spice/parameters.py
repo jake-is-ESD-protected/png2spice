@@ -1,3 +1,9 @@
+"""
+This submodule of **png2spice** contains widely used parameters and
+fine-tuning. The issue of fine-tuning is described in the paper for
+**png2spice**.
+"""
+
 from os.path import join
 
 class CP2SParameters:

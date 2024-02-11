@@ -1,9 +1,61 @@
+"""
+This submodule of **png2spice** parses the virtual graph into LTSPICE
+syntax and exports it as `.asc` file for LTSPICE to open. Sadly, the 
+relationships of the LTSPICE part coordinatees and their terminals is
+undocumented, which means that it had to be investigated manually. The
+results are described and used below:
+
+LT SPICE COMPONENT TO PLACEMENT ALIGNMENT
+RESISTOR VER UPPER TERMINAL Y + 16
+RESISTOR VER TERMINAL X + 16
+RESISTOR VER LOWER TERMINAL Y - 96
+RESISTOR HOR LEFT X -96
+RESISTOR HOR LEFT Y +16
+RESISTOR HOR RIGHT X -16
+RESISTOR HOR RIGHT Y +16
+
+CAPACITOR VER UPPER TERMINAL Y + 16
+CAPACITOR VER TERMINAL X + 16
+CAPACITOR VER LOWER TERMINAL Y - 64
+CAPACITOR HOR LEFT X -64
+CAPACITOR HOR LEFT Y +16
+CAPACITOR HOR RIGHT X +48
+CAPACITOR HOR RIGHT Y +16
+
+INDUCTOR VER UPPER TERMINAL Y + 16
+INDUCTOR VER TERMINAL X + 16
+INDUCTOR VER LOWER TERMINAL Y + 96
+INDUCTOR HOR LEFT X - 96
+INDUCTOR HOR LEFT Y + 16
+INDUCTOR HOR RIGHT X -16
+INDUCTOR HOR RIGHT Y + 16
+
+DIODE VER UPPER TERMINAL Y +0
+DIODE VER TERMINAL X + 16
+DIODE VER LOWER TERMINAL Y +64
+DIODE HOR LEFT X - 64
+DIODE HOR LEFT Y + 16
+DIODE HOR RIGHT X + 80
+DIODE HOR RIGHT Y + 16
+"""
+
 from POI import POI, POITypes
 from graphing import CGraph
 from typing import List, Union
 
 class CParser():
     def __init__(self, graph: Union[CGraph, List[POI]]) -> None:
+        """
+        BRIEF
+        -----
+        Create a parser objoect which consumes a `png2spice.graphing.CGraph`
+        and converts it into a `.asc` file for LTSPICE.
+
+        PARAMETERS
+        ----------
+        `graph`: `Union[CGraph, List[POI]]`
+            Graph or list of POIs (loose graph).
+        """
         if isinstance(graph, CGraph):
             self.graphContents = graph.looseGraph
         else:
@@ -20,40 +72,7 @@ class CParser():
             f"{POITypes.GND}": "0",            
         })
 
-    """
-    LT SPICE COMPONENT TO PLACEMENT ALIGNMENT
-    RESISTOR VER UPPER TERMINAL Y + 16
-    RESISTOR VER TERMINAL X + 16
-    RESISTOR VER LOWER TERMINAL Y - 96
-    RESISTOR HOR LEFT X -96
-    RESISTOR HOR LEFT Y +16
-    RESISTOR HOR RIGHT X -16
-    RESISTOR HOR RIGHT Y +16
 
-    CAPACITOR VER UPPER TERMINAL Y + 16
-    CAPACITOR VER TERMINAL X + 16
-    CAPACITOR VER LOWER TERMINAL Y - 64
-    CAPACITOR HOR LEFT X -64
-    CAPACITOR HOR LEFT Y +16
-    CAPACITOR HOR RIGHT X +48
-    CAPACITOR HOR RIGHT Y +16
-
-    INDUCTOR VER UPPER TERMINAL Y + 16
-    INDUCTOR VER TERMINAL X + 16
-    INDUCTOR VER LOWER TERMINAL Y + 96
-    INDUCTOR HOR LEFT X - 96
-    INDUCTOR HOR LEFT Y + 16
-    INDUCTOR HOR RIGHT X -16
-    INDUCTOR HOR RIGHT Y + 16
-
-    DIODE VER UPPER TERMINAL Y +0
-    DIODE VER TERMINAL X + 16
-    DIODE VER LOWER TERMINAL Y +64
-    DIODE HOR LEFT X - 64
-    DIODE HOR LEFT Y + 16
-    DIODE HOR RIGHT X + 80
-    DIODE HOR RIGHT Y + 16
-    """
     def __Poi2Str(self, poi: POI) -> str:
         """
         BRIEF
@@ -83,6 +102,30 @@ class CParser():
             return ""
 
     def __GeneratePartOffset(self, POIType: POITypes, x: int, y: int, rot: int, terminal: str) -> str: # maybe make this a num
+        """
+        BRIEF
+        -----
+        Obtain the fitting part offset per part type as needed by LTSPICE.
+
+        PARAMETERS
+        ----------
+        `POIType`: `png2spice.POI.POITypes`
+            Desired POI type.
+        `x`: `int`
+            x-coordinate of part.
+        `y`: `int`
+            y-coordinate of part.
+        `rot`: `int`
+            rotation of part.
+        `terminal`: `str`
+            Primary terminal (A) or secondary terminal (B).
+
+        RETURNS
+        -------
+        `str`:
+            POI as line in text format corresponding to LTSPICE
+            syntax.
+        """
         if(POIType == POITypes.Resistor):
             if(rot == 0):
                 if(terminal == "A"):
@@ -134,6 +177,24 @@ class CParser():
         return "0 0"
 
     def __GenerateWire(self, startPOI: POI, terminal: str) -> str:
+        """
+        BRIEF
+        -----
+        Create LTSPICE syntax for wires.
+
+        PARAMETERS
+        ----------
+        `startPOI`: `png2spice.POI.POI`
+            First POI in graph.
+        `terminal`: `str`
+            Primary terminal (A) or secondary terminal (B).
+            
+        RETURNS
+        -------
+        `str`:
+            Wire as line in text format corresponding to LTSPICE
+            syntax.
+        """
         startX = startPOI.position[0]
         startY = startPOI.position[1]
         rot = startPOI.rotation
