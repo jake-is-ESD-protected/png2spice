@@ -90,31 +90,20 @@ class CGraph:
         ComponentTerminalBVariance = int(P2SParameters.ComponentTerminalBVariance * P2SParameters.scalingFactor)
         for lG in self.looseGraph:
             for line in self.lines:
-                # if((lG.position == line[0:2]).all()):
-                #     lG.terminalALine = line[2:4]
-                # elif((lG.position == line[2:4]).all()):
-                #     lG.terminalALine = line[0:2]
                 if(math.dist(lG.position, line[0:2]) < ComponentTerminalBVariance):
                     if(lG.terminalBLine is None):
                         lG.terminalBLine = line[2:4]
                     elif(lG.terminalALine is None):
                         lG.terminalALine = line[2:4]
-                # elif((math.dist(lG.position, line[2:4]) < v)):
-                #     lG.terminalBLine = line[0:2]
-                # else statement is missing and can crash application!
 
         for lG1 in self.looseGraph:
             for lG2 in self.looseGraph:
                 if(lG1.terminalALine is not None and lG1.terminalA is None and (math.dist(lG2.position, lG1.terminalALine) < ComponentTerminalAVariance)):
                     if(lG1.terminalA is None):
                         lG1.terminalA = lG2
-                    # else:
-                    #    lG.terminalB = lG2
                 elif(lG1.terminalBLine is not None and lG1.terminalB is None and (math.dist(lG2.position, lG1.terminalBLine) < ComponentTerminalBVariance)):
                     if(lG1.terminalB is None):
                         lG1.terminalB = lG2
-                    # else:
-                    #    lG.terminalA = lG2
     
     def angle_of_line(self, p1: tuple, p2: tuple):
         """
@@ -159,7 +148,6 @@ class CGraph:
                     lG.rotation = 0
                 else:
                     lG.rotation = 90 # COMPENTS LAY
-            ###MAYBE ADD  lG.type not in skipped and
     
     def snapToGrid(self):
         """

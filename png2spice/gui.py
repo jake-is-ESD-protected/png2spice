@@ -144,12 +144,9 @@ class ScreenshotApp:
         """
         print(self.input_path)
         scalingFactor = get_scaling_from_OCR(self.input_path, threshold=15, letter_to_part_ratio=1/3)
-        print("SCALING_FACTOR", scalingFactor)
-        P2SParameters.setScalingFactor(scalingFactor * -0.5215 + 0.088)
-        #P2SParameters.setScalingFactor(0.05674014084507042)
-        print("SCALING_FACTOR", P2SParameters.scalingFactor)
 
-        #self.input_path = join("testSchematicsPNG", "schematic4.JPG")
+        P2SParameters.setScalingFactor(scalingFactor * -0.5215 + 0.088)
+        
         img = lines.imageDataFromPath(self.input_path)
         self.img = lines.normalizeImageData(img)
         os.remove(self.input_path)
