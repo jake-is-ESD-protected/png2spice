@@ -53,5 +53,5 @@ As we learned while doing this project, classification of schematics is a very h
 While some of these issues lay with us and our short development time and understaffing, other issues might not be tackled any time soon even with more development. Right now, the task of accurately analyzing a schematic of real-world-relevance seems to be a task too complex and special for AI.
 
 ## Paper
-See the accompanying paper [here]().
+See the accompanying paper [here](docs/PNG2SPICE.pdf).
 
